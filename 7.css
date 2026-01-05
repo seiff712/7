@@ -28,7 +28,7 @@ body{
   overflow-x:hidden;
 
   /* صورة البداية */
-  background: url("./img/1.JPG") center/cover no-repeat fixed;
+  background: url("1.JPG") center/cover no-repeat fixed;
   transition: background 0.8s ease;
 }
 
@@ -268,7 +268,7 @@ h1{margin:10px 0 6px; font-size: clamp(24px, 4vw, 34px);}
 
 /* ✅ صورة الفوز */
 body.bg-win{
-  background: url("./img/2.JPG") center/cover no-repeat fixed;
+  background: url("2.JPG") center/cover no-repeat fixed;
 }
 
 /* طبقة تغميق خفيفة عشان الكلام يبان */
@@ -285,3 +285,4 @@ body::before{
   position:relative;
   z-index:2;
 }
+
