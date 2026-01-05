@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Love Meter ❤️</title>
+  <link rel="stylesheet" href="7.css" />
+</head>
+<body>
+
+<main class="app">
+  <header class="hero">
+    <div class="badge">❤️ Love Meter</div>
+    <h1>مقياس الحب</h1>
+    <p class="muted">اكتبي الاسم واضغطي “قياس”</p>
+  </header>
+
+  <section class="panel">
+    <label class="label" for="name">الاسم</label>
+    <input class="inp" id="name" placeholder="اكتبي الاسم…" autocomplete="off" />
+
+    <button class="btn" id="go">قياس 💖</button>
+
+    <div class="bar" aria-label="Love progress">
+      <div class="fill" id="fill" style="width:0%"></div>
+    </div>
+
+    <div class="result big" id="out">جاهز؟</div>
+
+    <div class="final" id="final" hidden>
+      <h2>🎁 رسالة</h2>
+      <p id="msg"></p>
+      <button class="btn2" id="again">نجرب تاني</button>
+    </div>
+
+    
+  </section>
+</main>
+
+<!-- Layer للـ fireworks -->
+<div id="fx" class="fx" aria-hidden="true"></div>
+
+<script>
+  // ============ SETTINGS (عدّل هنا) ============
+  const RIGHT_NAME = "amany"; // ⭐ الاسم الوحيد اللي يطلع 100%
+  const POSITIVE_MESSAGE = "حب كامل 100% ❤️✨";
+  const NEGATIVE_MESSAGE = "0% ❌ الاسم ده مش هو 😄";
+  // ============================================
+
+  const nameEl = document.getElementById("name");
+  const go = document.getElementById("go");
+  const fill = document.getElementById("fill");
+  const out = document.getElementById("out");
+  const final = document.getElementById("final");
+  const msg = document.getElementById("msg");
+  const reset = document.getElementById("reset");
+  const again = document.getElementById("again");
+  const fx = document.getElementById("fx");
+
+  let timer = null;
+
+  function norm(s){ return (s || "").toString().trim().toLowerCase(); }
+
+  function resetUI(){
+    clearInterval(timer);
+    fill.style.width = "0%";
+    out.textContent = "جاهز؟";
+    final.hidden = true;
+    msg.textContent = "";
+    document.body.classList.remove("bg-win");
+    document.body.classList.remove("glow");
+    fx.innerHTML = "";
+  }
+
+  function fireworkBurst(x, y, count = 28){
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement("span");
+      p.className = "spark";
+
+      const angle = Math.random() * Math.PI * 2;
+      const dist  = 80 + Math.random() * 160;
+
+      p.style.left = x + "px";
+      p.style.top  = y + "px";
+      p.style.setProperty("--dx", (Math.cos(angle) * dist).toFixed(1) + "px");
+      p.style.setProperty("--dy", (Math.sin(angle) * dist).toFixed(1) + "px");
+      p.style.setProperty("--s", (0.9 + Math.random() * 0.9).toFixed(2));
+      p.style.setProperty("--d", (850 + Math.random() * 650).toFixed(0) + "ms");
+
+      fx.appendChild(p);
+      setTimeout(() => p.remove(), 1700);
+    }
+  }
+
+  function launchCelebration(){
+    // Glow + تغيير خلفية
+    document.body.classList.add("bg-win");
+    document.body.classList.add("glow");
+
+    // 4-6 انفجارات في أماكن مختلفة
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    const points = [
+      [w * 0.25, h * 0.35],
+      [w * 0.75, h * 0.35],
+      [w * 0.50, h * 0.25],
+      [w * 0.35, h * 0.55],
+      [w * 0.65, h * 0.55],
+    ];
+
+    let k = 0;
+    const t = setInterval(() => {
+      const [x, y] = points[k % points.length];
+      fireworkBurst(x, y, 30);
+      k++;
+      if (k >= 6) clearInterval(t);
+    }, 220);
+  }
+
+  function measure(){
+    const input = (nameEl.value || "").trim();
+    const who = input || "بدون اسم";
+
+    const ok = norm(input) === norm(RIGHT_NAME);
+    const target = ok ? 100 : 0;
+
+    msg.textContent = ok ? POSITIVE_MESSAGE : NEGATIVE_MESSAGE;
+
+    // رجّع الشكل الطبيعي قبل القياس
+    document.body.classList.remove("bg-win", "glow");
+    fx.innerHTML = "";
+
+    clearInterval(timer);
+    let p = 0;
+    fill.style.width = "0%";
+    out.textContent = "بنقيس…";
+    final.hidden = true;
+
+    timer = setInterval(() => {
+      if (p < target) {
+        p += 4;
+        if (p > target) p = target;
+
+        out.textContent = `${who} — النتيجة: ${p}%`;
+        fill.style.width = p + "%";
+      } else {
+        clearInterval(timer);
+        out.textContent = `${who} — النتيجة: ${target}%`;
+        final.hidden = false;
+
+        // ⭐ لو الاسم صح ووصل 100% → fireworks + نور
+        if (ok && target === 100) {
+  // fireworks + الخلفية
+  launchCelebration();
+
+  // bar يهتز وينوّر
+  const bar = document.querySelector(".bar");
+  bar.classList.add("shake", "glow");
+
+  // نشيل الاهتزاز بعد شوية (النور يفضل)
+  setTimeout(() => bar.classList.remove("shake"), 500);
+}
+
+      }
+    }, 40);
+  }
+
+  go.addEventListener("click", measure);
+  nameEl.addEventListener("keydown", (e) => { if (e.key === "Enter") measure(); });
+  reset.addEventListener("click", () => { nameEl.value = ""; resetUI(); });
+  again.addEventListener("click", () => { nameEl.focus(); resetUI(); });
+
+  resetUI();
+  const bar = document.querySelector(".bar");
+bar.classList.remove("shake", "glow");
+
+</script>
+
+</body>
+</html>
